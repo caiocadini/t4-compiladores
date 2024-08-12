@@ -49,8 +49,6 @@ public class LaSemanticoUtils {
             for (Map.Entry<String, TabelaDeSimbolos.TipoLa> entry : simbolos.entrySet()) {
                 String nome = entry.getKey();
                 TabelaDeSimbolos.TipoLa tipo = entry.getValue();
-    
-                // Formata a chave (nome) e o valor (tipo) como uma mensagem de erro
                 String mensagem = "Simbolo: " + nome + " - Tipo: " + tipo;
                 adicionarErroSemantico(t, mensagem);
             }
@@ -58,8 +56,7 @@ public class LaSemanticoUtils {
     }
     
     public static TabelaDeSimbolos.TipoLa verificarTipo(TabelaDeSimbolos tabela,
-            LaSemanticParser.Exp_aritmeticaContext ctx) {
-        // Tipo de retorno inicializado como null
+        LaSemanticParser.Exp_aritmeticaContext ctx) {
         TabelaDeSimbolos.TipoLa ret = null;
 
         // Verifica o tipo de cada termo na expressão aritmética
@@ -97,7 +94,6 @@ public class LaSemanticoUtils {
     }
 
     public static TabelaDeSimbolos.TipoLa verificarTipo(TabelaDeSimbolos tabela, LaSemanticParser.FatorContext ctx) {
-        // Tipo de retorno inicializado como null
         TabelaDeSimbolos.TipoLa ret = null;
 
         // Verifica o tipo de cada parcela no fator
@@ -124,9 +120,7 @@ public class LaSemanticoUtils {
         }
     }
 
-    public static TabelaDeSimbolos.TipoLa verificarTipo(TabelaDeSimbolos tabela,
-            LaSemanticParser.Parcela_unarioContext ctx) {
-        // Tipo de retorno inicializado como null
+    public static TabelaDeSimbolos.TipoLa verificarTipo(TabelaDeSimbolos tabela,LaSemanticParser.Parcela_unarioContext ctx) {
         TabelaDeSimbolos.TipoLa tipoRetorno = null;
         String nome;
 
@@ -135,16 +129,14 @@ public class LaSemanticoUtils {
             if (ctx.identificador().dimensao().getText().length() > 0) {
                 nome = ctx.identificador().IDENT().get(0).getText();
             }
-
-            if (tabela.existe(nome)) { // Verifica se o identificador existe na tabela
-                tipoRetorno = tabela.verificar(nome); // Obtém o tipo do identificador
+            // Verifica se o identificador existe na tabela
+            if (tabela.existe(nome)) { 
+                tipoRetorno = tabela.verificar(nome); 
             } else {
                 // Obtém o escopo atual
                 TabelaDeSimbolos aux = LaSemantico.escopos.obterEscopoAtual();
 
-                if (!aux.existe(nome)) { // Verifica se o identificador
-                                                                                      // existe no escopo atual
-                    // Adiciona erro se o identificador não existir
+                if (!aux.existe(nome)) {
                     adicionarErroSemantico(ctx.identificador().getStart(), "identificador " + nome + " nao declarado");
                     tipoRetorno = TabelaDeSimbolos.TipoLa.INVALIDO;
                 } else {
@@ -152,14 +144,13 @@ public class LaSemanticoUtils {
                 }
             }
         } else if (ctx.cmdChamada() != null) {
-            // Função chamada - Verificar tipo da função
+            // Verificar tipo da função
             String funcao = ctx.cmdChamada().IDENT().getText();
             if (!tabela.existe(funcao)) {
                 adicionarErroSemantico(ctx.cmdChamada().IDENT().getSymbol(),
                         "função " + funcao + " não declarada");
                 tipoRetorno = TabelaDeSimbolos.TipoLa.INVALIDO;
             } else {
-
                 tipoRetorno = tabela.verificar(funcao);
             }
         } else if (ctx.NUM_INT() != null) {
@@ -175,27 +166,25 @@ public class LaSemanticoUtils {
         return tipoRetorno;
     }
 
-    public static TabelaDeSimbolos.TipoLa verificarTipo(TabelaDeSimbolos tabela,
-            LaSemanticParser.Parcela_nao_unarioContext ctx) {
-        // Tipo de retorno inicializado como null
+    public static TabelaDeSimbolos.TipoLa verificarTipo(TabelaDeSimbolos tabela,LaSemanticParser.Parcela_nao_unarioContext ctx) {
         TabelaDeSimbolos.TipoLa tipoRetorno;
         String nome;
 
-        if (ctx.identificador() != null) { // Se a parcela contém um identificador
-            // Obtém o texto do identificador
+        if (ctx.identificador() != null) { 
+            // Se a parcela contém um identificador obtém o texto do identificador
             nome = ctx.identificador().getText();
 
             if (ctx.getText().startsWith("&")) {
                 return TipoLa.ENDERECO;
             }
-
-            if (!tabela.existe(nome)) { // Verifica se o identificador existe na tabela
+             // Verifica se o identificador existe na tabela
+            if (!tabela.existe(nome)) { 
                 // Adiciona erro se o identificador não existir
-
                 adicionarErroSemantico(ctx.identificador().getStart(), "identificador " + nome + " nao declarado");
                 tipoRetorno = TabelaDeSimbolos.TipoLa.INVALIDO;
             } else {
-                tipoRetorno = tabela.verificar(nome); // Obtém o tipo do identificador
+                // Obtém o tipo do identificador
+                tipoRetorno = tabela.verificar(nome); 
             }
         } else {
             // Define o tipo como LIT (literal) se não for um identificador
@@ -205,15 +194,12 @@ public class LaSemanticoUtils {
         return tipoRetorno;
     }
 
-    public static TabelaDeSimbolos.TipoLa verificarTipo(TabelaDeSimbolos tabela,
-            LaSemanticParser.ExpressaoContext ctx) {
-        // Tipo de retorno inicializado como null
+    public static TabelaDeSimbolos.TipoLa verificarTipo(TabelaDeSimbolos tabela, LaSemanticParser.ExpressaoContext ctx) {
         TabelaDeSimbolos.TipoLa ret = null;
 
         // Verifica o tipo de cada termo lógico
         for (LaSemanticParser.Termo_logicoContext termo : ctx.termo_logico()) {
             TabelaDeSimbolos.TipoLa aux = verificarTipo(tabela, termo);
-
             if (ret == null) {
                 ret = aux;
             } else if (ret != aux && aux != TabelaDeSimbolos.TipoLa.INVALIDO) {
@@ -224,9 +210,7 @@ public class LaSemanticoUtils {
         return ret;
     }
 
-    public static TabelaDeSimbolos.TipoLa verificarTipo(TabelaDeSimbolos tabela,
-            LaSemanticParser.Termo_logicoContext ctx) {
-        // Tipo de retorno inicializado como null
+    public static TabelaDeSimbolos.TipoLa verificarTipo(TabelaDeSimbolos tabela, LaSemanticParser.Termo_logicoContext ctx) {
         TabelaDeSimbolos.TipoLa ret = null;
 
         // Verifica o tipo de cada fator lógico
@@ -243,8 +227,7 @@ public class LaSemanticoUtils {
         return ret;
     }
 
-    public static TabelaDeSimbolos.TipoLa verificarTipo(TabelaDeSimbolos tabela,
-            LaSemanticParser.Fator_logicoContext ctx) {
+    public static TabelaDeSimbolos.TipoLa verificarTipo(TabelaDeSimbolos tabela, LaSemanticParser.Fator_logicoContext ctx) {
         // Verifica o tipo da parcela lógica
         return verificarTipo(tabela, ctx.parcela_logica());
     }
@@ -260,11 +243,8 @@ public class LaSemanticoUtils {
         }
     }
 
-    public static TabelaDeSimbolos.TipoLa verificarTipo(TabelaDeSimbolos tabela,
-            LaSemanticParser.Exp_relacionalContext ctx) {
-        // Tipo de retorno inicializado como null
+    public static TabelaDeSimbolos.TipoLa verificarTipo(TabelaDeSimbolos tabela,LaSemanticParser.Exp_relacionalContext ctx) {
         TabelaDeSimbolos.TipoLa ret = null;
-
         // Verifica o tipo de cada expressão aritmética
         for (LaSemanticParser.Exp_aritmeticaContext exp : ctx.exp_aritmetica()) {
             TabelaDeSimbolos.TipoLa aux = verificarTipo(tabela, exp);

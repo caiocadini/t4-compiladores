@@ -12,10 +12,13 @@ public class LaSemantico extends LaSemanticBaseVisitor<Void> {
 
     // Gerencia os escopos do programa
     public static Escopos escopos = new Escopos();
-    private TipoLa tipoRetornoFuncaoAtual; // Adicionado para armazenar o tipo de retorno da função atual
-    private Map<String, List<TipoLa>> parametrosFuncoes = new HashMap<>(); // Armazena os parâmetros das
-                                                                           // funções/procedimentos
-    private Map<String, TipoLa> tiposRetornoFuncoes = new HashMap<>(); // Armazena os tipos de retorno das funções
+    //Retorno da Função
+    private TipoLa tipoRetornoFuncaoAtual; 
+    //Salvar a lista com os retornos de cada função
+    private Map<String, TipoLa> tiposRetornoFuncoes = new HashMap<>();
+    //Salvar os parâmetros das funções
+    private Map<String, List<TipoLa>> parametrosFuncoes = new HashMap<>(); 
+    //Armazena lista com os tipos criados e as variáveis referentes caso seja registro
     public static Map<String, ArrayList<String>> tiposLista = new HashMap<>();
 
     @Override
@@ -127,7 +130,7 @@ public class LaSemantico extends LaSemanticBaseVisitor<Void> {
 
             // Adiciona a função ou procedimento na tabela global com o tipo de retorno
             tabelaGlobal.adicionar(nome, tipo);
-            tiposRetornoFuncoes.put(nome, tipo); // Armazena o tipo de retorno
+            tiposRetornoFuncoes.put(nome, tipo);
 
             // Cria novo escopo para os parâmetros da função ou procedimento
             escopos.criarNovoEscopo();
@@ -157,9 +160,10 @@ public class LaSemantico extends LaSemanticBaseVisitor<Void> {
                                 escopos.obterEscopoAtual().adicionar(nomeParam, TipoLa.REG);
                                 parametros.add(TipoLa.REG);
                             }else{
+                                 // Adiciona o parâmetro na tabela de símbolos do escopo atual
                                 escopos.obterEscopoAtual().adicionar(nomeParam, tipoParamLa);
                                 parametros.add(tipoParamLa);
-                            }                            // Adiciona o parâmetro na tabela de símbolos do escopo atual
+                            }                           
                             
                         }
                     }
@@ -173,11 +177,12 @@ public class LaSemantico extends LaSemanticBaseVisitor<Void> {
             super.visitDeclaracao_global(ctx);
             // Volta ao escopo anterior ao finalizar a análise da função
             escopos.abandonarEscopo();
-            tipoRetornoFuncaoAtual = null; // Reseta o tipo de retorno da função atual
+            // Reseta o tipo de retorno da função atual
+            tipoRetornoFuncaoAtual = null; 
         }
         return null;
     }
-
+    //Visita a chamada da função em si dentro do código
     @Override
     public Void visitCmdChamada(LaSemanticParser.CmdChamadaContext ctx) {
         String nome = ctx.IDENT().getText();
@@ -230,20 +235,11 @@ public class LaSemantico extends LaSemanticBaseVisitor<Void> {
     public Void visitCmdRetorne(LaSemanticParser.CmdRetorneContext ctx) {
         TipoLa tipoRetornoExpressao = LaSemanticoUtils.verificarTipo(escopos.obterEscopoAtual(), ctx.expressao());
 
-        // Verifica se estamos dentro de uma função
+        // Verifica se a função tem um retorno vazio ou diferente do esperado
         if (tipoRetornoFuncaoAtual == null || !tipoCompativel(tipoRetornoFuncaoAtual, tipoRetornoExpressao)) {
             LaSemanticoUtils.adicionarErroSemantico(ctx.getStart(),
                     "comando retorne nao permitido nesse escopo");
-        } /* else {
-            // Verifica se o tipo de retorno da expressão é compatível com o tipo de retorno
-            // da função
-            TipoLa tipoRetornoExpressao = LaSemanticoUtils.verificarTipo(escopos.obterEscopoAtual(), ctx.expressao());
-            if (!tipoCompativel(tipoRetornoFuncaoAtual, tipoRetornoExpressao)) {
-                LaSemanticoUtils.adicionarErroSemantico(ctx.expressao().start,
-                        "Tipo de retorno incompatível: esperado " + tipoRetornoFuncaoAtual + " mas encontrado "
-                                + tipoRetornoExpressao);
-            }
-        } */
+        } 
         return super.visitCmdRetorne(ctx);
     }
 
@@ -265,9 +261,6 @@ public class LaSemantico extends LaSemanticBaseVisitor<Void> {
 
             // Verifica se a variável é um campo de um registro
             if (tipoVariavel == TipoLa.REG) {
-                // O identificador pode ser um campo de um registro
-                // O identificador completo inclui o nome do registro e o campo
-                // Verifica se é um campo de um registro
                 if (nomeVar.contains(".")) {
                     // Obtém o nome do registro e o campo
                     String[] partes = nomeVar.split("\\.");
@@ -334,10 +327,11 @@ public class LaSemantico extends LaSemanticBaseVisitor<Void> {
         List<LaSemanticParser.IdentificadorContext> identificadores = ctx.identificador();
         for (LaSemanticParser.IdentificadorContext identificador : identificadores) {
             String nomeVar = identificador.getText();
+            //Verifica se é um vetor
             if (identificador.dimensao().getText().length() > 0) {
                 nomeVar = identificador.IDENT().get(0).getText();
             }
-
+            //Verifica existência do identificador
             if (!escopos.obterEscopoAtual().existe(nomeVar)) {
                 LaSemanticoUtils.adicionarErroSemantico(identificador.getStart(),
                         "identificador " + identificador.getText() + " nao declarado");

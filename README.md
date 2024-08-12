@@ -1,4 +1,4 @@
-# T3 Compiladores
+# T4 Compiladores
 
 * Heitor Colichio - 800423
 * Caio Obatake Watari Gonçalves Cadini - 800383
@@ -19,7 +19,7 @@
 * maven-project-info-reports-plugin = 3.0.0
 
 ## Execução
-
+O projeto é uma continuação do T3, utilizando o mesmo projeto criado em momento anterior e apenas construindo em cima disso para expandir os casos que o analisador semântico consegue interpretar e detectar problemas
 ### Criação do projeto
 
 A criação do projeto foi realizada utilizando como base o repositório da matéria no github, tendo criado o projeto usando o comando maven: 
